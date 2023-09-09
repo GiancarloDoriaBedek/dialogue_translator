@@ -1,0 +1,11 @@
+{
+    "npc_greeting": "Hello, traveler! Welcome to our village.",
+    "npc_question": "Have you come seeking adventure?",
+    "npc_response": "I see. There's no shortage of quests around here.",
+    "npc_farewell": "Take care on your journey, and may your path be safe.",
+    
+    "player_greeting": "Greetings, kind NPC. What's happening here?",
+    "player_question": "Tell me more about the quests available.",
+    "player_response": "Thanks for the information. I'll check them out.",
+    "player_farewell": "Goodbye for now. I'll be back for more quests."
+  }

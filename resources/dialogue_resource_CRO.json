@@ -1,0 +1,11 @@
+{
+    "npc_greeting": "Bok, putniče! Dobrodošao u naše selo.",
+    "npc_question": "Dolaziš li u potrazi za avanturom?",
+    "npc_response": "Razumijem. Ovdje ne nedostaje zadataka.",
+    "npc_farewell": "Čuvaj se na svojem putovanju i neka ti put bude siguran.",
+    
+    "player_greeting": "Pozdrav, dragi NPC. Što se ovdje događa?",
+    "player_question": "Reci mi više o dostupnim zadacima.",
+    "player_response": "Hvala na informacijama. Pogledat ću ih.",
+    "player_farewell": "Zbogom za sada. Vratit ću se za više zadataka."
+  }

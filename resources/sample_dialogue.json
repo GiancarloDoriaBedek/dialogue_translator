@@ -1,0 +1,36 @@
+{
+  "conversation": [
+    {
+      "speaker": "npc",
+      "message": "npc_greeting"
+    },
+    {
+      "speaker": "player",
+      "message": "player_greeting"
+    },
+    {
+      "speaker": "npc",
+      "message": "npc_question"
+    },
+    {
+      "speaker": "player",
+      "message": "player_question"
+    },
+    {
+      "speaker": "npc",
+      "message": "npc_response"
+    },
+    {
+      "speaker": "player",
+      "message": "player_response"
+    },
+    {
+      "speaker": "npc",
+      "message": "npc_farewell"
+    },
+    {
+      "speaker": "player",
+      "message": "player_farewell"
+    }
+  ]
+}
