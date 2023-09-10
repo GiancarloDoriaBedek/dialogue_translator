@@ -33,7 +33,8 @@ protected:  // control bar embedded members
 	CMFCRibbonApplicationButton m_MainButton;
 	CMFCToolBarImages m_PanelImages;
 	CMFCRibbonStatusBar  m_wndStatusBar;
-	JsonEditControl m_jsonEditControl;
+	JsonEditControl m_leftJsonEditControl;
+	JsonEditControl m_rightJsonEditControl;
 
 // Generated message map functions
 protected:

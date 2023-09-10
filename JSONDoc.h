@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 
 class JSONDoc : public CDocument
 {
@@ -17,10 +18,12 @@ public:
 	virtual BOOL OnNewDocument();
 	virtual BOOL OnOpenDocument(LPCTSTR lpszPathName);
 	virtual void Serialize(CArchive& ar);
-#ifdef SHARED_HANDLERS
-	virtual void InitializeSearchContent();
-	virtual void OnDrawThumbnail(CDC& dc, LPRECT lprcBounds);
-#endif // SHARED_HANDLERS
+
+private:
+	CString m_jsonDialogueOriginal;
+	CString m_jsonDialogueResourceA;
+	CString m_jsonDialogueResourceB;
+	CString ReplaceMessageKeysWithValues(CString jsonContent, std::map<CString, CString> resource);
 
 // Implementation
 public:
@@ -38,6 +41,5 @@ protected:
 
 #ifdef SHARED_HANDLERS
 	// Helper function that sets search content for a Search Handler
-	void SetSearchContent(const CString& value);
 #endif // SHARED_HANDLERS
 };

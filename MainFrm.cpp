@@ -62,7 +62,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndStatusBar.AddExtendedElement(new CMFCRibbonStatusBarPane(ID_STATUSBAR_PANE2, strTitlePane2, TRUE), strTitlePane2);
 
 	//m_jsonEditControl = new JsonEditControl();
-	m_jsonEditControl.Create(WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_AUTOVSCROLL, CRect(20, 120, 600, 500), this, IDC_EDIT_JSON);
+	m_leftJsonEditControl.Create(WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_AUTOVSCROLL, CRect(20, 120, 600, 500), this, IDC_EDIT_JSON);
+	m_rightJsonEditControl.Create(WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_AUTOVSCROLL, CRect(620, 200, 600, 500), this, IDC_EDIT_JSON_RIGHT);
 
 	// enable Visual Studio 2005 style docking window behavior
 	CDockingManager::SetDockingMode(DT_SMART);
@@ -86,7 +87,7 @@ void CMainFrame::OnSize(UINT nType, int cx, int cy)
 	CFrameWndEx::OnSize(nType, cx, cy);
 
 	// Update the position and size of your controls here
-	if (m_jsonEditControl.GetSafeHwnd() != nullptr)
+	if (m_leftJsonEditControl.GetSafeHwnd() != nullptr)
 	{
 		// Calculate the size and position for the JsonEditControl
 		CRect clientRect;
@@ -96,7 +97,20 @@ void CMainFrame::OnSize(UINT nType, int cx, int cy)
 		int jsonEditHeight = clientRect.Height() - 180; // Adjust as needed
 
 		// Adjust the position and size of the JsonEditControl
-		m_jsonEditControl.MoveWindow(4, 150, jsonEditWidth, jsonEditHeight);
+		m_leftJsonEditControl.MoveWindow(4, 150, jsonEditWidth, jsonEditHeight);
+	}
+
+	if (m_rightJsonEditControl.GetSafeHwnd() != nullptr)
+	{
+		// Calculate the size and position for the JsonEditControl
+		CRect clientRect;
+		GetClientRect(&clientRect);
+
+		int jsonEditWidth = clientRect.Width() / 2; // Take up half of the width
+		int jsonEditHeight = clientRect.Height() - 180; // Adjust as needed
+
+		// Adjust the position and size of the JsonEditControl
+		m_rightJsonEditControl.MoveWindow(620, 150, jsonEditWidth, jsonEditHeight);
 	}
 }
 

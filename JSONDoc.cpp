@@ -14,6 +14,7 @@
 #endif
 #include <fstream>
 #include <afxwin.h>
+#include "MainFrm.h"
 
 IMPLEMENT_DYNCREATE(JSONDoc, CDocument)
 
@@ -53,11 +54,21 @@ BOOL JSONDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		}
 		file.Close();
 
+        CMainFrame* pMainFrame = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
 		// Get a pointer to your CEdit control
 		JsonEditControl* pEditControl = (JsonEditControl*)AfxGetMainWnd()->GetDlgItem(IDC_EDIT_JSON);
 		if (pEditControl)
 		{
-			pEditControl->SetWindowText(jsonContent);
+            CString jsonWithValues = ReplaceMessageKeysWithValues(jsonContent, pMainFrame->ResourceA);
+			pEditControl->SetWindowText(jsonWithValues);
+		}
+
+
+		JsonEditControl* pEditControlRight = (JsonEditControl*)AfxGetMainWnd()->GetDlgItem(IDC_EDIT_JSON_RIGHT);
+		if (pEditControlRight)
+		{
+            CString jsonWithValues = ReplaceMessageKeysWithValues(jsonContent, pMainFrame->ResourceB);
+			pEditControlRight->SetWindowText(jsonWithValues);
 		}
 	}
 
@@ -74,59 +85,55 @@ void JSONDoc::Serialize(CArchive& ar)
 	}
 }
 
-#ifdef SHARED_HANDLERS
-
-// Support for thumbnails
-void Cv11Doc::OnDrawThumbnail(CDC& dc, LPRECT lprcBounds)
+CString JSONDoc::ReplaceMessageKeysWithValues(CString jsonContent, std::map<CString, CString> resource)
 {
-	// Modify this code to draw the document's data
-	dc.FillSolidRect(lprcBounds, RGB(255, 255, 255));
+    CStringArray lines;
+    int startPos = 0;
+    int endPos = 0;
+    while (endPos != -1)
+    {
+        endPos = jsonContent.Find('\n', startPos);
+        if (endPos == -1)
+            lines.Add(jsonContent.Mid(startPos));
+        else
+            lines.Add(jsonContent.Mid(startPos, endPos - startPos));
+        startPos = endPos + 1;
+    }
 
-	CString strText = _T("TODO: implement thumbnail drawing here");
-	LOGFONT lf;
+    for (int i = 0; i < lines.GetSize(); i++)
+    {
+        CString line = lines.GetAt(i);
 
-	CFont* pDefaultGUIFont = CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT));
-	pDefaultGUIFont->GetLogFont(&lf);
-	lf.lfHeight = 36;
+        int colonPos = line.Find(':');
+        if (colonPos != -1)
+        {
+            CString key = line.Left(colonPos);
+            CString value = line.Mid(colonPos + 1);
 
-	CFont fontDraw;
-	fontDraw.CreateFontIndirect(&lf);
+            key.Trim();
+            value.Trim();
 
-	CFont* pOldFont = dc.SelectObject(&fontDraw);
-	dc.DrawText(strText, lprcBounds, DT_CENTER | DT_WORDBREAK);
-	dc.SelectObject(pOldFont);
+            key.Remove('\"');
+            value.Remove('\"');
+
+            auto it = resource.find(value);
+            if (it != resource.end())
+            {
+                lines.SetAt(i, CString("\"") + key + CString("\": \"") + it->second + CString("\""));
+            }
+        }
+    }
+
+    CString modifiedJSON;
+    for (int i = 0; i < lines.GetSize(); i++)
+    {
+        modifiedJSON += lines.GetAt(i);
+        if (i < lines.GetSize() - 1)
+            modifiedJSON += '\n';
+    }
+
+    return modifiedJSON;
 }
-
-// Support for Search Handlers
-void Cv11Doc::InitializeSearchContent()
-{
-	CString strSearchContent;
-	// Set search contents from document's data. 
-	// The content parts should be separated by ";"
-
-	// For example:  strSearchContent = _T("point;rectangle;circle;ole object;");
-	SetSearchContent(strSearchContent);
-}
-
-void Cv11Doc::SetSearchContent(const CString& value)
-{
-	if (value.IsEmpty())
-	{
-		RemoveChunk(PKEY_Search_Contents.fmtid, PKEY_Search_Contents.pid);
-	}
-	else
-	{
-		CMFCFilterChunkValueImpl *pChunk = NULL;
-		ATLTRY(pChunk = new CMFCFilterChunkValueImpl);
-		if (pChunk != NULL)
-		{
-			pChunk->SetTextValue(PKEY_Search_Contents, value, CHUNK_TEXT);
-			SetChunkValue(pChunk);
-		}
-	}
-}
-
-#endif // SHARED_HANDLERS
 
 #ifdef _DEBUG
 void JSONDoc::AssertValid() const
