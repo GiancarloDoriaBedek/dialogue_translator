@@ -17,13 +17,17 @@ public:
 public:
 	virtual BOOL OnNewDocument();
 	virtual BOOL OnOpenDocument(LPCTSTR lpszPathName);
+	virtual afx_msg void OnFileSave();
 	virtual void Serialize(CArchive& ar);
 
 private:
 	CString m_jsonDialogueOriginal;
 	CString m_jsonDialogueResourceA;
 	CString m_jsonDialogueResourceB;
+	std::map<CString, std::map<CString, CString>> m_mappedMessages;
 	CString ReplaceMessageKeysWithValues(CString jsonContent, std::map<CString, CString> resource);
+	void ReplaceInMap(const CString& originalValue, const CString& changedValue);
+
 
 // Implementation
 public:
@@ -37,6 +41,7 @@ protected:
 
 // Generated message map functions
 protected:
+	afx_msg void OnEnChange();
 	DECLARE_MESSAGE_MAP()
 
 #ifdef SHARED_HANDLERS

@@ -26,18 +26,13 @@ int JsonEditControl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 void JsonEditControl::OnEnChange()
 {
-    //GetWindowText(m_jsonContent); // Update JSON content when text changes
-
-    // Get a pointer to the edit control
     CEdit* pEdit = (CEdit*)GetDlgItem(IDC_EDIT_JSON);
 
     if (pEdit)
     {
-        // Get the current text from the edit control
         CString newText;
         pEdit->GetWindowText(newText);
 
-        // Do something with the new text, e.g., display it in a message box
         AfxMessageBox(newText);
     }
 }

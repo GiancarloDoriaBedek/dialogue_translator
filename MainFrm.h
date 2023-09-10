@@ -42,13 +42,16 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnApplicationLook(UINT id);
 	afx_msg void OnUpdateApplicationLook(CCmdUI* pCmdUI);
+	afx_msg void OnEnSetfocusJsonEditControl();
 	DECLARE_MESSAGE_MAP()
 
 public:
 	afx_msg void OnOpenFirstResourceFile();
 	afx_msg void OnOpenSecondResourceFile();
+	CString ResourceAPath;
 	std::map<CString, CString> ResourceA;
 	std::map<CString, CString> ResourceB;
+	afx_msg void CMainFrame::InvalidateRightJSON();
 
 private:
 	std::map<CString, CString> LoadResourceJSONFile(CString jsonContent);

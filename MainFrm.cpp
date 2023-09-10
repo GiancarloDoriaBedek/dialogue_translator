@@ -21,6 +21,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_APPLOOK_WIN_2000, ID_VIEW_APPLOOK_WINDOWS_7, &CMainFrame::OnUpdateApplicationLook)
 	ON_COMMAND(ID_BUTTON_FIRST, &CMainFrame::OnOpenFirstResourceFile)
 	ON_COMMAND(ID_BUTTON_SECOND, &CMainFrame::OnOpenSecondResourceFile)
+	ON_EN_SETFOCUS(IDC_EDIT_JSON, &CMainFrame::OnEnSetfocusJsonEditControl)
 END_MESSAGE_MAP()
 
 // CMainFrame construction/destruction
@@ -225,10 +226,10 @@ void CMainFrame::OnOpenFirstResourceFile()
 
 	if (fileDialog.DoModal() == IDOK)
 	{
-		CString selectedFilePath = fileDialog.GetPathName();
+		ResourceAPath = fileDialog.GetPathName();
 
 		CStdioFile file;
-		if (file.Open(selectedFilePath, CFile::modeRead | CFile::typeText))
+		if (file.Open(ResourceAPath, CFile::modeRead | CFile::typeText))
 		{
 			CString jsonContent;
 			CString line;
@@ -309,4 +310,14 @@ std::map<CString, CString> CMainFrame::LoadResourceJSONFile(CString jsonContent)
 	}
 
 	return keyValuePairs;
+}
+
+void CMainFrame::OnEnSetfocusJsonEditControl()
+{
+	InvalidateRightJSON();
+}
+
+void CMainFrame::InvalidateRightJSON()
+{
+	GetDlgItem(IDC_EDIT_JSON_RIGHT)->Invalidate();
 }
