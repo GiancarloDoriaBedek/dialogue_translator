@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "resource.h"
 // SHARED_HANDLERS can be defined in an ATL project implementing preview, thumbnail
 // and search filter handlers and allows sharing of document code with that project.
 #ifndef SHARED_HANDLERS
@@ -15,6 +16,7 @@
 #include <fstream>
 #include <afxwin.h>
 #include "MainFrm.h"
+#include "MainView.h"
 
 IMPLEMENT_DYNCREATE(JSONDoc, CDocument)
 
@@ -33,10 +35,10 @@ JSONDoc::~JSONDoc()
 
 BOOL JSONDoc::OnNewDocument()
 {
-	if (!CDocument::OnNewDocument())
-		return FALSE;
+    if (!CDocument::OnNewDocument())
+        return FALSE;
 
-	return TRUE;
+    return TRUE;
 }
 
 BOOL JSONDoc::OnOpenDocument(LPCTSTR lpszPathName)
@@ -44,25 +46,22 @@ BOOL JSONDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	if (!CDocument::OnOpenDocument(lpszPathName))
 		return FALSE;
 
-	CStdioFile file;
-	if (file.Open(lpszPathName, CFile::modeRead | CFile::typeText))
-	{
-		CString jsonContent;
-		CString line;
-		while (file.ReadString(line))
-		{
-			jsonContent += line;
-			jsonContent += _T("\r\n"); // Add newline for formatting
-		}
-		file.Close();
-
-        CMainFrame* pMainFrame = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+	//CStdioFile file;
+	//if (file.Open(lpszPathName, CFile::modeRead | CFile::typeText))
+	//{
+	//	CString line;
+	//	while (file.ReadString(line))
+	//	{
+ //           JSONContent += line;
+ //           JSONContent += _T("\r\n"); // Add newline for formatting
+	//	}
+	//	file.Close();
 
 		// Only left json is editable
-		JsonEditControl* pEditControl = (JsonEditControl*)AfxGetMainWnd()->GetDlgItem(IDC_EDIT_JSON);
+		/*JsonEditControl* pEditControl = (JsonEditControl*)AfxGetMainWnd()->GetDlgItem(IDC_EDIT_JSON);
 		if (pEditControl)
 		{
-            CString jsonWithValues = ReplaceMessageKeysWithValues(jsonContent, pMainFrame->ResourceA);
+            CString jsonWithValues = ReplaceMessageKeysWithValues(JSONContent, pEditControl->ResourceA);
             m_jsonDialogueOriginal = jsonWithValues;
 			pEditControl->SetWindowText(jsonWithValues);
 		}
@@ -71,36 +70,43 @@ BOOL JSONDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		JsonEditControl* pEditControlRight = (JsonEditControl*)AfxGetMainWnd()->GetDlgItem(IDC_EDIT_JSON_RIGHT);
 		if (pEditControlRight)
 		{
-            CString jsonWithValues = ReplaceMessageKeysWithValues(jsonContent, pMainFrame->ResourceB);
+            CString jsonWithValues = ReplaceMessageKeysWithValues(JSONContent, pMainFrame->ResourceB);
 			pEditControlRight->SetWindowText(jsonWithValues);
-		}
-	}
+		}*/
+	//}
+
+    CStdioFile file;
+    if (file.Open(lpszPathName, CFile::modeRead | CFile::typeText))
+    {
+        CString line;
+        while (file.ReadString(line))
+        {
+            m_jsonDialogueOriginal += line;
+            m_jsonDialogueOriginal += _T("\r\n"); // Add newline for formatting
+        }
+        file.Close();
+    }
+
+
+    CString myString;
+    
+    UpdateAllViews(nullptr, 0, (CObject*)&JSONContent);
 
 	return TRUE;
 }
 
-void JSONDoc::Serialize(CArchive& ar)
-{
-	if (ar.IsStoring())
-	{
-	}
-	else
-	{
-	}
-}
-
-CString JSONDoc::ReplaceMessageKeysWithValues(CString jsonContent, std::map<CString, CString> resource)
+CString JSONDoc::ReplaceMessageKeysWithValues(std::map<CString, CString> resource)
 {
     CStringArray lines;
     int startPos = 0;
     int endPos = 0;
     while (endPos != -1)
     {
-        endPos = jsonContent.Find('\n', startPos);
+        endPos = m_jsonDialogueOriginal.Find('\n', startPos);
         if (endPos == -1)
-            lines.Add(jsonContent.Mid(startPos));
+            lines.Add(m_jsonDialogueOriginal.Mid(startPos));
         else
-            lines.Add(jsonContent.Mid(startPos, endPos - startPos));
+            lines.Add(m_jsonDialogueOriginal.Mid(startPos, endPos - startPos));
         startPos = endPos + 1;
     }
 
@@ -213,55 +219,55 @@ void JSONDoc::OnEnChange()
                 }
             }
 
-            ReplaceInMap(originalMessageField, editedMessageField);
+            //ReplaceInMap(originalMessageField, editedMessageField);
             m_jsonDialogueOriginal = editedText;
             CMainFrame* pMainFrame = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
-            pMainFrame->ResourceA;
+            //pMainFrame->ResourceA;
         }
     }
 
-    pMainFrame->InvalidateRightJSON();
+    //pMainFrame->InvalidateRightJSON();
 }
 
-void JSONDoc::ReplaceInMap(const CString& originalValue, const CString& changedValue)
-{
-    CMainFrame* pMainFrame = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+//void JSONDoc::ReplaceInMap(const CString& originalValue, const CString& changedValue)
+//{
+//    CMainFrame* pMainFrame = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+//
+//    CString key;
+//
+//    for (const auto& pair : pMainFrame->ResourceA)
+//    {
+//        if (pair.second == originalValue)
+//        {
+//            pMainFrame->ResourceA[pair.first] = changedValue;
+//            return;
+//        }
+//    }
+//}
 
-    CString key;
-
-    for (const auto& pair : pMainFrame->ResourceA)
-    {
-        if (pair.second == originalValue)
-        {
-            pMainFrame->ResourceA[pair.first] = changedValue;
-            return;
-        }
-    }
-}
-
-void JSONDoc::OnFileSave()
-{
-    CMainFrame* pMainFrame = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
-
-    CFile file;
-    if (!file.Open(pMainFrame->ResourceAPath, CFile::modeCreate | CFile::modeWrite))
-    {
-        AfxMessageBox(_T("Failed to open the file for writing."));
-        return;
-    }
-
-    // Create a JSON-like string from the map
-    CString jsonContent = _T("{\n");
-    for (const auto& pair : pMainFrame->ResourceA) {
-        jsonContent += _T("  \"") + pair.first + _T("\": \"") + pair.second + _T("\",\n");
-    }
-    // Remove the trailing comma and newline
-    jsonContent = jsonContent.Left(jsonContent.GetLength() - 2) + _T("\n}");
-
-    // Write the string to the file
-    file.Write(jsonContent, jsonContent.GetLength() * sizeof(TCHAR));
-    file.Close();
-}
+//void JSONDoc::OnFileSave()
+//{
+//    CMainFrame* pMainFrame = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+//
+//    CFile file;
+//    if (!file.Open(pMainFrame->ResourceAPath, CFile::modeCreate | CFile::modeWrite))
+//    {
+//        AfxMessageBox(_T("Failed to open the file for writing."));
+//        return;
+//    }
+//
+//    // Create a JSON-like string from the map
+//    CString jsonContent = _T("{\n");
+//    for (const auto& pair : pMainFrame->ResourceA) {
+//        jsonContent += _T("  \"") + pair.first + _T("\": \"") + pair.second + _T("\",\n");
+//    }
+//    // Remove the trailing comma and newline
+//    jsonContent = jsonContent.Left(jsonContent.GetLength() - 2) + _T("\n}");
+//
+//    // Write the string to the file
+//    file.Write(jsonContent, jsonContent.GetLength() * sizeof(TCHAR));
+//    file.Close();
+//}
 
 
 #ifdef _DEBUG

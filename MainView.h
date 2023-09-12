@@ -1,4 +1,5 @@
 #pragma once
+#include "JsonEdit.h";
 
 class MainView : public CView
 {
@@ -17,11 +18,29 @@ public:
 public:
 	virtual void OnDraw(CDC* pDC);
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	virtual int OnCreate(LPCREATESTRUCT lpCreateStruct);
 protected:
 
 // Implementation
 public:
 	virtual ~MainView();
+	CString ResourceAPath;
+	std::map<CString, CString> ResourceA;
+	std::map<CString, CString> ResourceB;
+protected:
+	JsonEditControl* m_leftJsonEditControl;
+	JsonEditControl* m_rightJsonEditControl;
+	virtual void OnInitialUpdate();
+	afx_msg void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
+	afx_msg void OnApplicationLook(UINT id);
+	afx_msg void OnUpdateApplicationLook(CCmdUI* pCmdUI);
+	afx_msg void OnEnSetfocusJsonEditControl();
+	afx_msg void OnOpenFirstResourceFile();
+	afx_msg void OnOpenSecondResourceFile();
+	std::map<CString, CString> LoadResourceJSONFile(CString jsonContent);
+
+	LRESULT OnUpdateLeftJson(WPARAM wParam, LPARAM lParam);
+	LRESULT OnUpdateRightJson(WPARAM wParam, LPARAM lParam);
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;

@@ -4,11 +4,11 @@
 class JSONDoc : public CDocument
 {
 protected: // create from serialization only
-	JSONDoc();
 	DECLARE_DYNCREATE(JSONDoc)
 
 // Attributes
 public:
+	JSONDoc();
 
 // Operations
 public:
@@ -17,16 +17,19 @@ public:
 public:
 	virtual BOOL OnNewDocument();
 	virtual BOOL OnOpenDocument(LPCTSTR lpszPathName);
-	virtual afx_msg void OnFileSave();
-	virtual void Serialize(CArchive& ar);
+	//virtual afx_msg void OnFileSave();
+	CString JSONContent;
+	CString JSONReplacedResourceA;
+	CString JSONReplacedResourceB;
+	CString ReplaceMessageKeysWithValues(std::map<CString, CString> resource);
+	
 
 private:
 	CString m_jsonDialogueOriginal;
 	CString m_jsonDialogueResourceA;
 	CString m_jsonDialogueResourceB;
 	std::map<CString, std::map<CString, CString>> m_mappedMessages;
-	CString ReplaceMessageKeysWithValues(CString jsonContent, std::map<CString, CString> resource);
-	void ReplaceInMap(const CString& originalValue, const CString& changedValue);
+	//void ReplaceInMap(const CString& originalValue, const CString& changedValue);
 
 
 // Implementation
