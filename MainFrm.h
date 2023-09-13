@@ -1,9 +1,5 @@
 #pragma once
 
-#include "JsonEdit.h"
-#include <map>
-#include "MainView.h"
-
 class CMainFrame : public CFrameWndEx
 {
 	
@@ -34,8 +30,6 @@ protected:  // control bar embedded members
 	CMFCRibbonApplicationButton m_MainButton;
 	CMFCToolBarImages m_PanelImages;
 	CMFCRibbonStatusBar  m_wndStatusBar;
-	/*JsonEditControl m_leftJsonEditControl;
-	JsonEditControl m_rightJsonEditControl;*/
 
 // Generated message map functions
 protected:
@@ -47,15 +41,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 public:
-	/*afx_msg void OnOpenFirstResourceFile();
-	afx_msg void OnOpenSecondResourceFile();*/
-	/*CString ResourceAPath;
-	std::map<CString, CString> ResourceA;
-	std::map<CString, CString> ResourceB;*/
-	//afx_msg void CMainFrame::InvalidateRightJSON();
 
 private:
-	//std::map<CString, CString> LoadResourceJSONFile(CString jsonContent);
 };
 
 

@@ -6,7 +6,6 @@
 BEGIN_MESSAGE_MAP(JsonEditControl, CEdit)
     ON_WM_CREATE()
     ON_EN_CHANGE(IDC_EDIT_JSON, &JsonEditControl::OnEnChange)
-    //ON_EN_CHANGE(IDC_EDIT_JSON_RIGHT, &JsonEditControl::OnEnChange)
 END_MESSAGE_MAP()
 
 JsonEditControl::JsonEditControl()

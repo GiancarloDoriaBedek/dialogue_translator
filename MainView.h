@@ -1,5 +1,7 @@
 #pragma once
-#include "JsonEdit.h";
+#include "JsonEdit.h"
+
+class JSONDoc;
 
 class MainView : public CView
 {
@@ -27,20 +29,23 @@ public:
 	CString ResourceAPath;
 	std::map<CString, CString> ResourceA;
 	std::map<CString, CString> ResourceB;
+	CString JSONReplacedResourceA;
+
 protected:
-	JsonEditControl* m_leftJsonEditControl;
-	JsonEditControl* m_rightJsonEditControl;
+	JsonEditControl m_leftJsonEditControl;
+	JsonEditControl m_rightJsonEditControl;
 	virtual void OnInitialUpdate();
 	afx_msg void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
-	afx_msg void OnApplicationLook(UINT id);
-	afx_msg void OnUpdateApplicationLook(CCmdUI* pCmdUI);
-	afx_msg void OnEnSetfocusJsonEditControl();
 	afx_msg void OnOpenFirstResourceFile();
 	afx_msg void OnOpenSecondResourceFile();
+	afx_msg void OnEnChange();
 	std::map<CString, CString> LoadResourceJSONFile(CString jsonContent);
+	CString FindMessageValue(CString line);
+	void ReplaceInMap(const CString& originalValue, const CString& changedValue);
+	void MainView::OnFileSave();
+
 
 	LRESULT OnUpdateLeftJson(WPARAM wParam, LPARAM lParam);
-	LRESULT OnUpdateRightJson(WPARAM wParam, LPARAM lParam);
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;

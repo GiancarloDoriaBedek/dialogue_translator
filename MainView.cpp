@@ -24,8 +24,10 @@ BEGIN_MESSAGE_MAP(MainView, CView)
 	ON_WM_CONTEXTMENU()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_RBUTTONUP()
+	ON_EN_CHANGE(IDC_EDIT_JSON, &MainView::OnEnChange)
 	ON_COMMAND(ID_BUTTON_FIRST, &MainView::OnOpenFirstResourceFile)
 	ON_COMMAND(ID_BUTTON_SECOND, &MainView::OnOpenSecondResourceFile)
+	ON_COMMAND(ID_FILE_SAVE, &MainView::OnFileSave)
 END_MESSAGE_MAP()
 
 // MainView construction/destruction
@@ -46,17 +48,16 @@ BOOL MainView::PreCreateWindow(CREATESTRUCT& cs)
 
 void MainView::OnInitialUpdate()
 {
-	CView::OnInitialUpdate();
-	// Document = GetDocument();
 
 }
 
 int MainView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
-	m_leftJsonEditControl = new JsonEditControl();
-	m_leftJsonEditControl->Create(WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_AUTOVSCROLL, CRect(20, 120, 600, 500), this, IDC_EDIT_JSON);
-	m_rightJsonEditControl = new JsonEditControl();
-	m_rightJsonEditControl->Create(WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_AUTOVSCROLL, CRect(620, 200, 600, 500), this, IDC_EDIT_JSON_RIGHT);
+	CView::OnCreate(lpCreateStruct);
+	lpCreateStruct->cx = 520;
+	lpCreateStruct->cy = 1230;
+	m_leftJsonEditControl.Create(WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_AUTOVSCROLL, CRect(10, 10, 610, 500), this, IDC_EDIT_JSON);
+	m_rightJsonEditControl.Create(WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_AUTOVSCROLL, CRect(620, 10, 1220, 500), this, IDC_EDIT_JSON_RIGHT);
 
 	return 0;
 }
@@ -65,14 +66,6 @@ int MainView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 void MainView::OnDraw(CDC* pDC)
 {
-	//// Create a font and set it for drawing
-	//CFont font;
-	//font.CreatePointFont(200, _T("Arial"));
-	//pDC->SelectObject(&font);
-
-	//// Draw text on the view
-	//pDC->TextOut(100, 100, _T("Hello, MFC!"));
-	return;
 }
 
 void MainView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
@@ -97,9 +90,6 @@ JSONDoc* MainView::GetDocument() const // non-debug version is inline
 {
 	ASSERT(m_pDocument->IsKindOf(RUNTIME_CLASS(JSONDoc))); 
 	return (JSONDoc*)m_pDocument;
-
-	//CMainFrame* pFrame = (CMainFrame*)(AfxGetApp()->m_pMainWnd);
-	//return (JSONDoc*)pFrame->GetActiveDocument();
 }
 #endif //_DEBUG
 
@@ -128,7 +118,6 @@ void MainView::OnOpenFirstResourceFile()
 			}
 			file.Close();
 
-			// Parse the JSON content manually
 			ResourceA = LoadResourceJSONFile(jsonContent);
 		}
 	}
@@ -158,7 +147,6 @@ void MainView::OnOpenSecondResourceFile()
 			}
 			file.Close();
 
-			// Parse the JSON content manually
 			ResourceB = LoadResourceJSONFile(jsonContent);
 		}
 	}
@@ -205,35 +193,153 @@ std::map<CString, CString> MainView::LoadResourceJSONFile(CString jsonContent)
 void MainView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 {
 	OnUpdateLeftJson(lHint, lHint);
-	JSONDoc* pDoc = static_cast<JSONDoc*>(pHint);
 }
 
 LRESULT MainView::OnUpdateLeftJson(WPARAM wParam, LPARAM lParam)
 {
-	// Handle the custom message for the left JSON
-	// You can update the left view based on the event
-
-	// For example, you can call a function to refresh the left view
 	JSONDoc* pDoc = GetDocument();
 
-	 //Only left json is editable
-	CString jsonWithValues = pDoc->ReplaceMessageKeysWithValues(ResourceA);
-	pDoc->JSONContent = jsonWithValues;
-	m_leftJsonEditControl->SetWindowText(jsonWithValues);
+	//Only left json is editable
+	CString leftJsonWithValues = pDoc->ReplaceMessageKeysWithValues(ResourceA);
+	pDoc->JSONContent = leftJsonWithValues;
+	m_leftJsonEditControl.SetWindowText(leftJsonWithValues);
 	
 
-	jsonWithValues = pDoc->ReplaceMessageKeysWithValues(ResourceB);
-	m_rightJsonEditControl->SetWindowText(jsonWithValues);
-	
+	CString rightJsonWithValues = pDoc->ReplaceMessageKeysWithValues(ResourceB);
+	m_rightJsonEditControl.SetWindowText(rightJsonWithValues);
+	m_rightJsonEditControl.Invalidate();
 	return 0;
 }
 
-LRESULT MainView::OnUpdateRightJson(WPARAM wParam, LPARAM lParam)
+/**
+ * Handles changes in the text content of the JSON editor controls.
+ * Compares the edited JSON lines with the original lines and updates the documents content accordingly.
+ */
+void MainView::OnEnChange()
 {
-	// Handle the custom message for the left JSON
-	// You can update the left view based on the event
+	JSONDoc* pDoc = GetDocument();
 
-	// For example, you can call a function to refresh the left view
+	CString editedText;
+	m_leftJsonEditControl.GetWindowTextW(editedText);
+	CStringArray originalLines;
+	int originalStartPos = 0;
+	int originalEndPos = 0;
+	while (originalEndPos != -1)
+	{
+		originalEndPos = pDoc->JSONContent.Find(_T("\n"), originalStartPos);
+		if (originalEndPos == -1)
+			originalLines.Add(pDoc->JSONContent.Mid(originalStartPos));
+		else
+			originalLines.Add(pDoc->JSONContent.Mid(originalStartPos, originalEndPos - originalStartPos));
+		originalStartPos = originalEndPos + 1;
+	}
 
-	return 0;
+	CStringArray editedLines;
+	int startPos = 0;
+	int endPos = 0;
+	while (endPos != -1)
+	{
+		endPos = editedText.Find(_T("\n"), startPos);
+		if (endPos == -1)
+			editedLines.Add(editedText.Mid(startPos));
+		else
+			editedLines.Add(editedText.Mid(startPos, endPos - startPos));
+		startPos = endPos + 1;
+	}
+
+	for (int i = 0; i < editedLines.GetSize(); i++)
+	{
+		CString editedLine = editedLines.GetAt(i);
+		CString originalLine = (i < originalLines.GetSize()) ? originalLines.GetAt(i) : _T("");
+
+		if (originalLine == editedLine)
+		{
+			continue;
+		}
+
+		int messageFieldStart = originalLine.Find(_T("\"message\""));
+		if (messageFieldStart == -1)
+		{
+			continue;
+		}
+
+		CString originalMessageField = FindMessageValue(originalLine);
+		CString editedMessageField = FindMessageValue(editedLine);
+		
+		ReplaceInMap(originalMessageField, editedMessageField);
+		pDoc->JSONContent = editedText;
+	}
+}
+
+/**
+ * Finds and extracts the value associated with a "message" field in a JSON line.
+ *
+ * @param line The JSON line to search for the "message" field.
+ * @return The value associated with the "message" field, or an empty string if not found.
+ */
+CString MainView::FindMessageValue(CString line)
+{
+	CString messageFieldValue;
+	int messageFieldStart = line.Find(_T("\"message\""));
+	int colonPos = line.Find(_T(":"), messageFieldStart + 9);
+
+	if (colonPos != -1)
+	{
+		int valueStart = line.Find(_T("\""), colonPos + 1);
+		if (valueStart != -1)
+		{
+			int valueEnd = line.Find(_T("\""), valueStart + 1);
+			if (valueEnd != -1)
+			{
+				messageFieldValue = line.Mid(valueStart + 1, valueEnd - valueStart - 1);
+			}
+		}
+	}
+
+	return messageFieldValue;
+}
+
+/**
+ * Replaces a value in the resource map (ResourceA) with a changed value.
+ * Searches for the original value within the map and updates it with the new value.
+ *
+ * @param originalValue The original value to be replaced.
+ * @param changedValue The new value to replace the original one.
+ */
+void MainView::ReplaceInMap(const CString& originalValue, const CString& changedValue)
+{
+    CMainFrame* pMainFrame = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+
+    CString key;
+
+    for (const auto& pair : ResourceA)
+    {
+        if (pair.second == originalValue)
+        {
+            ResourceA[pair.first] = changedValue;
+            return;
+        }
+    }
+}
+
+void MainView::OnFileSave()
+{
+    CFile file;
+    if (!file.Open(ResourceAPath, CFile::modeCreate | CFile::modeWrite))
+    {
+        AfxMessageBox(_T("Failed to open the file for writing."));
+        return;
+    }
+
+    // Create a JSON-like string from the map
+    CString jsonContent = _T("{\n");
+    for (const auto& pair : ResourceA) {
+        jsonContent += _T("  \"") + pair.first + _T("\": \"") + pair.second + _T("\",\n");
+    }
+    // Remove the trailing comma and newline
+    jsonContent = jsonContent.Left(jsonContent.GetLength() - 2) + _T("\n}");
+
+    // Write the string to the file
+    file.Write(jsonContent, jsonContent.GetLength() * sizeof(TCHAR));
+    file.Close();
 }
